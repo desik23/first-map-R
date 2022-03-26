@@ -1,0 +1,58 @@
+---
+title: "EDS 220 Assignment 1 Cartography"
+author: "Desik Somasundaram"
+date: "9/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(spData)
+library(tidyverse)
+library(sf)
+library(tmap)
+library(here)
+library(janitor)
+library(basemaps)
+library(spDataLarge)
+library(dplyr)
+library(raster)
+library(RColorBrewer)
+library(rgeos)
+library(rnaturalearth)
+library(rnaturalearthdata)
+```
+
+```{r join}
+#joined spatial data of world with tabular world bank data
+worldbank = left_join(world, worldbank_df)
+#rounded pop growth percentage to 2 digits
+worldbank <- worldbank %>% 
+            mutate(pop_growth = round(pop_growth,2))
+```
+
+```{r LifeExp}
+#Create a map using tmap
+ tm_shape(world) + #add basemap of the world 
+  tm_borders() + #add borders
+  tm_shape(worldbank) + #add data 
+  tm_fill("lifeExp", title = "Life Expectancy (Years)", style = "pretty", textNA = "No data", colorNA = "gray", palette = "YlGnBu", direction = -1, alpha = 0.5) + #add life expectancy data, no data = gray, change color to yellow/blue/green with a 0.5 transparency
+  tm_layout(main.title = "Life Expectancy in Years by Country", main.title.position = "center") + # add main title
+  tm_layout(frame.lwd = 4, legend.position = c(0.01, 0.14), inner.margins = 0.055) + #change legend position 
+  tm_compass(type = "8star", position = c(0.01, 0.6), size = 2.5) + #add north arrow/compass
+  tm_scale_bar(position = c(0.50, 0.05), text.size = 0.55) + #add scale bar
+  tm_credits("This figure shows the life expectancy by country of those born in 2014, with lower expected ages in regions of Africa and Asia. Data Source: https://data.worldbank.org/ (package: spData version 0.3.10)", position = c(0.025, 0.01)) #added credits and text
+```
+
+```{r popgrowth}
+ tm_shape(world) + #add base map
+  tm_borders() + #add borders
+  tm_shape(worldbank) + #add growth rate data
+  tm_fill("pop_growth", title = "Population Growth (Annual %)",  style = "jenks", textNA = "No data", colorNA = "gray", palette = "YlGnBu", direction = -1, alpha = 0.5) + #add growth rate data, 
+  tm_layout(main.title = "Annual Population Growth Rate by Country", main.title.position = "center") + #add main title
+  tm_layout(frame.lwd = 4, legend.position = c(0.01, 0.12), inner.margins = 0.055) + #change legend position, no data = gray, change color to yellow/blue/green with a 0.5 transparency; 
+  tm_compass(type = "8star", position = c(0.01, 0.5), size = 2.5) + #add north arrow  
+  tm_scale_bar(position = c(0.50, 0.05), text.size = 0.55) + #add scale bar 
+  tm_credits("This figure shows the annual population growth in percentage by country, with higher rates of growth found in regions of Africa and Asia. Data Source: https://data.worldbank.org/ (package: spData version 0.3.10)", position = c(0.025, 0.01)) #added credits and text 
+```
+
